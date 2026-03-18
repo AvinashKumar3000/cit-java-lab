@@ -1,12 +1,14 @@
+
+
 # Experiment
 
-**Thread-Safe Queue and Producer-Consumer Application**
+**Thread-Safe Queue using Collection and Producer-Consumer Application**
 
 ---
 
 # 1. Aim
 
-To implement a **thread-safe queue** using synchronization and develop a **Producer-Consumer application** using Java threads.
+To implement a **thread-safe queue using Java Collection (Queue)** and develop a **Producer-Consumer application** using synchronization, `wait()` and `notifyAll()`.
 
 ---
 
@@ -14,9 +16,10 @@ To implement a **thread-safe queue** using synchronization and develop a **Produ
 
 ## Thread
 
-A **Thread** is a lightweight process that runs **concurrently**.
+A **Thread** is a lightweight process that executes tasks **concurrently**.
 
 Two ways to create a thread:
+
 1. **Extend Thread class**
 2. **Implement Runnable interface**
 
@@ -24,9 +27,9 @@ Two ways to create a thread:
 
 ## Synchronization
 
-When multiple threads access **shared data**, it may cause **data inconsistency**.
+When multiple threads access **shared resources**, it may lead to **data inconsistency**.
 
-**Synchronization** ensures only **one thread** accesses the shared resource at a time.
+**Synchronization** ensures that only **one thread accesses the shared resource at a time**.
 
 ```java
 synchronized void put(int value) { }
@@ -35,47 +38,58 @@ synchronized int get() { }
 
 ---
 
-## wait() and notify()
+## wait() and notifyAll()
 
-- **wait()** — makes the current thread **wait** until another thread calls `notify()`.
-- **notify()** — **wakes up** one waiting thread.
+* **wait()** → Pauses the thread until another thread notifies it
+* **notifyAll()** → Wakes up all waiting threads
 
-These methods are used inside **synchronized** blocks.
+These methods must be used inside **synchronized methods/blocks**.
+
+---
+
+## Queue (Collection)
+
+A **Queue** follows **FIFO (First In First Out)** principle.
+
+In this program, Queue is used with LinkedList for dynamic storage.
+
+Advantages:
+
+* No need for manual `front` and `rear`
+* Simpler implementation
+* Dynamic size handling
 
 ---
 
 ## Producer-Consumer Problem
 
-- **Producer** — generates data and puts it into a queue.
-- **Consumer** — takes data from the queue and processes it.
+* **Producer** → Produces data and adds to queue
+* **Consumer** → Consumes data from queue
 
-Rules:
-- Producer **waits** if the queue is **full**.
-- Consumer **waits** if the queue is **empty**.
+### Conditions:
+
+* Producer waits if queue is **full**
+* Consumer waits if queue is **empty**
 
 ---
 
 # 3. Program
 
 ```java
+import java.util.LinkedList;
+import java.util.Queue;
+
 class SharedQueue {
 
-    private int[] queue;
-    private int front;
-    private int rear;
-    private int count;
+    private Queue<Integer> queue = new LinkedList<>();
     private int capacity;
 
-    public SharedQueue(int size) {
-        capacity = size;
-        queue = new int[capacity];
-        front = 0;
-        rear = 0;
-        count = 0;
+    public SharedQueue(int capacity) {
+        this.capacity = capacity;
     }
 
     public synchronized void put(int value) {
-        while (count == capacity) {
+        while (queue.size() == capacity) {
             try {
                 System.out.println("Queue Full - Producer waiting");
                 wait();
@@ -84,15 +98,15 @@ class SharedQueue {
                 return;
             }
         }
-        queue[rear] = value;
-        rear = (rear + 1) % capacity;
-        count++;
+
+        queue.add(value);
         System.out.println("Produced: " + value);
-        notify();
+
+        notifyAll();
     }
 
     public synchronized int get() {
-        while (count == 0) {
+        while (queue.isEmpty()) {
             try {
                 System.out.println("Queue Empty - Consumer waiting");
                 wait();
@@ -101,11 +115,11 @@ class SharedQueue {
                 return -1;
             }
         }
-        int value = queue[front];
-        front = (front + 1) % capacity;
-        count--;
+
+        int value = queue.remove();
         System.out.println("Consumed: " + value);
-        notify();
+
+        notifyAll();
         return value;
     }
 }
@@ -171,15 +185,13 @@ public class ProducerConsumer {
 
 # 4. How to Run the Program
 
-### Step 1: Compile the program
+### Step 1: Compile
 
 ```bash
 javac ProducerConsumer.java
 ```
 
----
-
-### Step 2: Run the program
+### Step 2: Run
 
 ```bash
 java ProducerConsumer
@@ -203,10 +215,11 @@ Consumed: 4
 Consumed: 5
 ```
 
-**Note:** Output may vary slightly due to thread scheduling.
+**Note:** Output may vary due to thread scheduling.
 
 ---
 
 # 6. Result
 
-Thus, a **Thread-Safe Queue with Producer-Consumer application was implemented successfully using Java synchronization**.
+Thus, a **thread-safe queue using Java Collection (Queue)** was implemented successfully, and the **Producer-Consumer problem was solved using synchronization, wait(), and notifyAll()**.
+
